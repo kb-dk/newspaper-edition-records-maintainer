@@ -1,4 +1,4 @@
-package dk.statsbiblioteket.medieplatform.newspaper.titleRecords;
+package dk.statsbiblioteket.medieplatform.newspaper.editionRecords;
 
 import org.testng.annotations.Test;
 
@@ -7,6 +7,8 @@ import dk.statsbiblioteket.doms.central.connectors.fedora.structures.FedoraRelat
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.ResultCollector;
+import dk.statsbiblioteket.medieplatform.newspaper.titleRecords.NewspaperIndex;
+import dk.statsbiblioteket.medieplatform.newspaper.titleRecords.RunnableTitleRecordRelationsMaintainer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-public class RunnableTitleRecordRelationsMaintainerTest {
+public class RunnableEditionRecordRelationsMaintainerTest {
 
     private static final String URI_PREFIX = "info:fedora/";
     private static final String PREDICATE = "http://doms.statsbiblioteket.dk/relations/default/0/1/#isPartOfNewspaper";

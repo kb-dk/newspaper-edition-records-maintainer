@@ -1,4 +1,7 @@
-package dk.statsbiblioteket.medieplatform.newspaper.titleRecords;
+package dk.statsbiblioteket.medieplatform.newspaper.editionRecords;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedoraImpl;
 import dk.statsbiblioteket.doms.webservices.authentication.Credentials;
@@ -8,8 +11,8 @@ import dk.statsbiblioteket.medieplatform.autonomous.DomsItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.RunnableComponent;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIDomsAutonomousComponentUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dk.statsbiblioteket.medieplatform.newspaper.titleRecords.NewspaperIndex;
+import dk.statsbiblioteket.medieplatform.newspaper.titleRecords.RunnableTitleRecordRelationsMaintainer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,9 +20,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
-public class TitleRecordRelationsMaintainerComponent {
+public class EditionRecordRelationsMaintainerComponent {
 
-    private static Logger log = LoggerFactory.getLogger(TitleRecordRelationsMaintainerComponent.class);
+    private static Logger log = LoggerFactory.getLogger(
+            dk.statsbiblioteket.medieplatform.newspaper.titleRecords.TitleRecordRelationsMaintainerComponent.class);
 
 
     /**
@@ -29,7 +33,7 @@ public class TitleRecordRelationsMaintainerComponent {
      * @param args an array of length 1, where the first entry is a path to the properties file
      */
     public static void main(String[] args) throws Exception {
-        log.info("Entered " + TitleRecordRelationsMaintainerComponent.class);
+        log.info("Entered " + dk.statsbiblioteket.medieplatform.newspaper.titleRecords.TitleRecordRelationsMaintainerComponent.class);
         doMain(args);
     }
 
@@ -62,7 +66,7 @@ public class TitleRecordRelationsMaintainerComponent {
      * @param args the command line arguments
      *
      * @return a properties object parsed from the properties file
-     * @throws java.io.IOException if the file could not be read
+     * @throws IOException if the file could not be read
      * @throws RuntimeException    if no path could be determined
      */
     private static Properties readProperties(String[] args) throws IOException, RuntimeException {

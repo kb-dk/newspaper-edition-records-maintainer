@@ -1,8 +1,7 @@
-package dk.statsbiblioteket.medieplatform.newspaper.titleRecords;
+package dk.statsbiblioteket.medieplatform.newspaper.editionRecords;
 
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class NewspaperIndex {
