@@ -1,7 +1,7 @@
 <configuration>
 
 
-    <property name="LOGFILE" value="${user.home}/logs/manualQA-flagger.log"/>
+    <property name="LOGFILE" value="${user.home}/logs/editionRecords-maintainer.log"/>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <prudent>true</prudent>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
