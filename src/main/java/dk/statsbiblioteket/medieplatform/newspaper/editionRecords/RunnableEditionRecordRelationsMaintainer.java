@@ -7,11 +7,10 @@ import dk.statsbiblioteket.doms.central.connectors.BackendInvalidResourceExcepti
 import dk.statsbiblioteket.doms.central.connectors.BackendMethodFailedException;
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedora;
 import dk.statsbiblioteket.doms.central.connectors.fedora.structures.FedoraRelation;
+import dk.statsbiblioteket.medieplatform.autonomous.AbstractRunnableComponent;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.ItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.ResultCollector;
-import dk.statsbiblioteket.medieplatform.autonomous.RunnableComponent;
-import dk.statsbiblioteket.medieplatform.newspaper.titleRecords.NewspaperIndex;
 import dk.statsbiblioteket.util.xml.DOM;
 import dk.statsbiblioteket.util.xml.XPathSelector;
 
@@ -19,9 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-public class RunnableEditionRecordRelationsMaintainer implements RunnableComponent<Item> {
+public class RunnableEditionRecordRelationsMaintainer extends AbstractRunnableComponent<Item> {
     private static final String URI_PREFIX = "info:fedora/";
-    private final Properties properties;
     private final EnhancedFedora eFedora;
     private String editionToNewspaperRelation = "http://doms.statsbiblioteket.dk/relations/default/0/1/#isPartOfNewspaper";
     private ItemFactory<Item> itemFactory;
@@ -29,176 +27,162 @@ public class RunnableEditionRecordRelationsMaintainer implements RunnableCompone
 
     public RunnableEditionRecordRelationsMaintainer(Properties properties, EnhancedFedora eFedora,
                                                     ItemFactory<Item> itemFactory, NewspaperIndex newspaperIndex) {
-        this.properties = properties;
+        super(properties);
         this.eFedora = eFedora;
         this.itemFactory = itemFactory;
         this.newspaperIndex = newspaperIndex;
     }
 
     @Override
-    public String getComponentName() {
-        return null;
-    }
-
-    @Override
-    public String getComponentVersion() {
-        return null;
-    }
-
-    @Override
     public String getEventID() {
-        return null;
+        return "Editions_relations_generated";
     }
 
     @Override
     public void doWorkOnItem(Item item, ResultCollector resultCollector) throws Exception {
-        // We assume that the received item is a newspaper object ("titelpost").
-        // This method is called whenever a newspaper object has changed
+        // We assume that the received item is an edition object
+        // This method is called whenever an edition object has changed
 
-        // Get PID for the newspaper object
+        // Get PID for the edition object
         String domsID = item.getDomsID();
 
-        String newspaperMods = eFedora.getXMLDatastreamContents(domsID, "MODS");
+        String newspaperMods = eFedora.getXMLDatastreamContents(domsID, "EDITION");
         Document newspaperDOM = DOM.stringToDOM(newspaperMods, true);
         XPathSelector xpath = DOM.createXPathSelector("v3", "http://www.loc.gov/mods/v3");
-        String avisID = xpath.selectString(newspaperDOM, "/v3:mods/v3:identifier[@type='ninestars avis id']/text()");
-        String startDate = xpath.selectString(newspaperDOM, "/v3:mods/v3:originInfo/v3:dateIssued[@point='start']/text()");
-        String endDate = xpath.selectString(newspaperDOM, "/v3:mods/v3:originInfo/v3:dateIssued[@point='end']/text()");
+        String avisID = xpath.selectString(newspaperDOM, "/v3:mods/v3:titleInfo[@type='uniform']/v3:title/text()");
+        String date = xpath.selectString(newspaperDOM, "/v3:mods/v3:originInfo/v3:dateIssued/text()");
 
-        // Get all editions that match given newspaper object ("titelpost") and date range, i.e. editions that SHOULD have the
+        // Get all newspapers that match given edition and date, i.e. titles that SHOULD have the
         // relation
-        List<Item> wantedEditions =  newspaperIndex.getEditions(avisID, startDate, endDate);
+        List<Item> wantedNewspapers =  newspaperIndex.getNewspapers(avisID, date);
 
-        // Get all editions that already HAVE the relation
-        List<Item> editionsWithRelation = getEditionsWithRelation(domsID);
+        // Get all titles that already HAVE the relation
+        List<Item> titlesWithRelation = getTitlesWithRelation(domsID);
 
-        // Now we want wantedEditions to = editionsWithRelation
+        // Now we want wantedTitles to = titlesWithRelation
 
-        // Add relations from editions that are wanted but aren't in editionsWithRelation
-        List<Item> editionsToAdd = getEditionsWantedButWithoutRelation(wantedEditions, editionsWithRelation);
-        for (Item toAdd : editionsToAdd) {
+        // Add relations to titles that are wanted but aren't in titlesWithRelation
+        List<Item> titlesToAdd = getTitlesWantedButWithoutRelation(wantedNewspapers, titlesWithRelation);
+        for (Item toAdd : titlesToAdd) {
             addRelationFromEditionToNewspaper(toAdd, domsID);
         }
 
-        // Remove relations that are in editionsWithRelation but aren't in wantedEditions
-        List<Item> editionsToRemove = getEditionsWithRelationButUnwanted(wantedEditions, editionsWithRelation);
-        for (Item toRemove : editionsToRemove) {
+        // Remove relations that are in titlesWithRelation but aren't in wantedTiles
+        List<Item> titlesToRemove = getTitlesWithRelationButUnwanted(wantedNewspapers, titlesWithRelation);
+        for (Item toRemove : titlesToRemove) {
             removeRelationFromEditionToNewspaper(toRemove, domsID);
         }
     }
 
     /**
-     * Get editions from which relations are wanted but that aren't in editionsWithRelation
+     * Get titles to which relations are wanted but that aren't in titlesWithRelation
      *
-     * @param wantedEditions Editions that we want
-     * @param editionsWithRelation Editions with a relation to "titelpost" that we already have
-     * @return editions from which relations are wanted but that aren't in editionsWithRelation
+     * @param wantedTitles Titles that we want
+     * @param titlesWithRelation Titles with a relation from edition that we already have
+     * @return titles to which relations are wanted but that aren't in titlesWithRelation
      */
-    private List<Item> getEditionsWantedButWithoutRelation(List<Item> wantedEditions, List<Item> editionsWithRelation) {
+    private List<Item> getTitlesWantedButWithoutRelation(List<Item> wantedTitles, List<Item> titlesWithRelation) {
         List<Item> result = new ArrayList<>();
-        for (Item wantedEdition : wantedEditions) {
-            if (!editionsWithRelation.contains(wantedEdition)) {
-                result.add(wantedEdition);
+        for (Item wantedTitle : wantedTitles) {
+            if (!titlesWithRelation.contains(wantedTitle)) {
+                result.add(wantedTitle);
             }
         }
         return result;
     }
 
     /**
-     * Get editions that are in editionsWithRelation but aren't in wantedEditions
+     * Get titles that are in titlesWithRelation but aren't in wantedTitles
      *
-     * @param wantedEditions Editions that we want
-     * @param editionsWithRelation Editions with a relation to "titelpost" that we already have
-     * @return editions that are in editionsWithRelation but aren't in wantedEditions
+     * @param wantedTitles Titles that we want
+     * @param titlesWithRelation Titles with a relation from edition that we already have
+     * @return titles that are in titlesWithRelation but aren't in wantedTitles
      */
-    private List<Item> getEditionsWithRelationButUnwanted(List<Item> wantedEditions, List<Item> editionsWithRelation) {
+    private List<Item> getTitlesWithRelationButUnwanted(List<Item> wantedTitles, List<Item> titlesWithRelation) {
         List<Item> result = new ArrayList<>();
-        for (Item editionWithRelation : editionsWithRelation) {
-            if (!wantedEditions.contains(editionWithRelation)) {
-                result.add(editionWithRelation);
+        for (Item titleWithRelation : titlesWithRelation) {
+            if (!wantedTitles.contains(titleWithRelation)) {
+                result.add(titleWithRelation);
             }
         }
         return result;
     }
 
     /**
-     * Get all editions that have the wanted relation to newspaper object ("titelpost") with given DOMS PID
+     * Get all titles that have the wanted relation from edition object with given DOMS PID
      *
-     * @param newspaperDomsID Newspaper object ("titelpost") to which relation should go
-     * @return All editions that have the wanted relation to newspaper object ("titelpost") with given DOMS PID
+     * @param editionDomsID Edition object from which relation should go
+     * @return All titles that have the wanted relation from edition object with given DOMS PID
      */
-    private List<Item> getEditionsWithRelation(String newspaperDomsID) throws
+    private List<Item> getTitlesWithRelation(String editionDomsID) throws
             BackendMethodFailedException, BackendInvalidResourceException, BackendInvalidCredsException {
 
-        List<Item> editions = new ArrayList<>();
+        List<Item> titles = new ArrayList<>();
 
-        // Get all relations that go from an edition to given newspaper object ("titelpost")
-        List<FedoraRelation> relations = eFedora.getInverseRelations(newspaperDomsID, editionToNewspaperRelation);
+        // Get all relations that go to a title from a given edition object
+        List<FedoraRelation> relations = eFedora.getNamedRelations(editionDomsID, editionToNewspaperRelation, null);
 
-        // Collect the editions that these relations point from. (Relations point from Edition to Newspaper)
+        // Collect the titles that these relations point to. (Relations point from Edition to Newspaper)
         for (FedoraRelation relation : relations) {
-            editions.add(itemFactory.create(uriToDomsID(relation.getSubject())));
+            titles.add(itemFactory.create(uriToDomsID(relation.getObject())));
         }
 
-        return editions;
+        return titles;
     }
 
     /**
-     * Add relation from given edition to newspaper object ("titelpost") with given PID (newspaperDomsID) in DOMS
+     * Add relation to given title from edition with given PID (editionDomsID) in DOMS
      *
-     * @param edition The edition which should be at the "source" end of the wanted relation
-     * @param newspaperDomsID The DOMS PID of the newspaper object ("titelpost") which should be the "target" of wanted relation
+     * @param title The title which should be at the "target" end of the wanted relation
+     * @param editionDomsID The DOMS PID of the edition object which should be the "source" of wanted relation
      * @throws BackendMethodFailedException
      * @throws BackendInvalidResourceException
      * @throws BackendInvalidCredsException
      */
-    private void addRelationFromEditionToNewspaper(Item edition, String newspaperDomsID) throws
+    private void addRelationFromEditionToNewspaper(Item title, String editionDomsID) throws
             BackendMethodFailedException, BackendInvalidResourceException, BackendInvalidCredsException {
-
-        // If edition already has wanted relation, nothing to do here, return
-        List<FedoraRelation> relations = eFedora.getNamedRelations(edition.getDomsID(), editionToNewspaperRelation, null);
-        for (FedoraRelation relation : relations) {
-            if (relation.getSubject().equals(newspaperDomsID)){
-                return;
-            }
-        }
 
         // Add relation from edition to newspaper object ("titelpost")
         try {
-            eFedora.addRelation(edition.getDomsID(), URI_PREFIX + edition.getDomsID(), editionToNewspaperRelation,
-                                URI_PREFIX + newspaperDomsID, false, "linking to");
+            eFedora.addRelation(editionDomsID, URI_PREFIX + editionDomsID, editionToNewspaperRelation,
+                                URI_PREFIX + title.getDomsID(), false, "linking to");
         } catch (BackendInvalidCredsException objectIsPublished) {
             // Edition was already published, so unpublish (set to "I" (inactive)) before adding
-            eFedora.modifyObjectState(edition.getDomsID(), "I", "comment");
+            eFedora.modifyObjectState(editionDomsID, "I", "comment");
             try {
-                eFedora.addRelation(edition.getDomsID(), URI_PREFIX + edition.getDomsID(), editionToNewspaperRelation, URI_PREFIX
-                        + newspaperDomsID, false,
-                        "linking to");
+                eFedora.addRelation(editionDomsID, URI_PREFIX + editionDomsID, editionToNewspaperRelation,
+                                    URI_PREFIX + title.getDomsID(), false, "linking to");
             } finally {
                 // Re-publish (set to "A" (active))
-                eFedora.modifyObjectState(edition.getDomsID(), "A", "comment");
+                eFedora.modifyObjectState(editionDomsID, "A", "comment");
             }
         }
     }
 
     /**
-     * Add relation from given edition to newspaper object ("titelpost") with given PID (newspaperDomsID) in DOMS, if it exists
+     * Remove relation to given title from edition object with given PID (editionDomsID) in DOMS, if it exists
      *
-     * @param edition The edition from which the possible relation to newspaperDomsID should be removed
-     * @param newspaperDomsID The target of the relations from edition that should be removed
+     * @param title The title to which the possible relation from editionDomsID should be removed
+     * @param editionDomsID The source of the relations to title that should be removed
      * @throws BackendMethodFailedException
      * @throws BackendInvalidResourceException
      * @throws BackendInvalidCredsException
      */
-    private void removeRelationFromEditionToNewspaper(Item edition, String newspaperDomsID) throws
+    private void removeRelationFromEditionToNewspaper(Item title, String editionDomsID) throws
             BackendMethodFailedException, BackendInvalidResourceException, BackendInvalidCredsException {
-
-        // If edition has relation to newspaperDomsID, remove it
-        List<FedoraRelation> relations = eFedora.getNamedRelations(edition.getDomsID(), editionToNewspaperRelation, null);
-        for (FedoraRelation relation : relations) {
-            if (relation.getObject().equals(URI_PREFIX + newspaperDomsID)) {
-                eFedora.deleteRelation(edition.getDomsID(), URI_PREFIX + edition.getDomsID(),
-                                       editionToNewspaperRelation, URI_PREFIX + newspaperDomsID, false, "linking to");
+        // Add relation from edition to newspaper object ("titelpost")
+        try {
+            eFedora.deleteRelation(editionDomsID, URI_PREFIX + editionDomsID, editionToNewspaperRelation,
+                                   URI_PREFIX + title.getDomsID(), false, "linking to");
+        } catch (BackendInvalidCredsException objectIsPublished) {
+            // Edition was already published, so unpublish (set to "I" (inactive)) before adding
+            eFedora.modifyObjectState(editionDomsID, "I", "comment");
+            try {
+                eFedora.deleteRelation(editionDomsID, URI_PREFIX + editionDomsID, editionToNewspaperRelation,
+                                       URI_PREFIX + title.getDomsID(), false, "linking to");
+            } finally {
+                // Re-publish (set to "A" (active))
+                eFedora.modifyObjectState(editionDomsID, "A", "comment");
             }
         }
     }

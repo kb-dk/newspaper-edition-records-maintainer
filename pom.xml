@@ -10,14 +10,14 @@
         <artifactId>newspaper-parent</artifactId>
         <version>1.2</version>
     </parent>
-    <artifactId>newspaper-title-records-maintainer</artifactId>
+    <artifactId>newspaper-edition-records-maintainer</artifactId>
     <version>1.0-SNAPSHOT</version>
 
 
-    <scm><!--TODO-->
-        <url>https://github.com/statsbiblioteket/newspaper-manualQA-flagger</url>
-        <connection>scm:git:https://github.com/statsbiblioteket/newspaper-manualQA-flagger.git</connection>
-        <developerConnection>scm:git:git@github.com:statsbiblioteket/newspaper-manualQA-flagger.git
+    <scm>
+        <url>https://github.com/statsbiblioteket/newspaper-editionRecords-maintainer</url>
+        <connection>scm:git:https://github.com/statsbiblioteket/newspaper-editionRecords-maintainer.git</connection>
+        <developerConnection>scm:git:git@github.com:statsbiblioteket/newspaper-editionRecords-maintainer.git
         </developerConnection>
         <tag>HEAD</tag>
     </scm>
@@ -29,7 +29,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>dk.statsbiblioteket.medieplatform.newspaper.titleRecords.TitleRecordRelationsMaintainerComponent
+                            <mainClass>dk.statsbiblioteket.medieplatform.newspaper.editionRecords.EditionRecordRelationsMaintainerComponent
                             </mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>

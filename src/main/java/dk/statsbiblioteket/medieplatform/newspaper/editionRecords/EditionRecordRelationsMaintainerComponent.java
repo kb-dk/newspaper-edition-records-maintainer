@@ -1,5 +1,6 @@
 package dk.statsbiblioteket.medieplatform.newspaper.editionRecords;
 
+import org.apache.solr.client.solrj.SolrServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +12,7 @@ import dk.statsbiblioteket.medieplatform.autonomous.DomsItemFactory;
 import dk.statsbiblioteket.medieplatform.autonomous.Item;
 import dk.statsbiblioteket.medieplatform.autonomous.RunnableComponent;
 import dk.statsbiblioteket.medieplatform.autonomous.SBOIDomsAutonomousComponentUtils;
-import dk.statsbiblioteket.medieplatform.newspaper.titleRecords.NewspaperIndex;
-import dk.statsbiblioteket.medieplatform.newspaper.titleRecords.RunnableTitleRecordRelationsMaintainer;
+import dk.statsbiblioteket.medieplatform.autonomous.SolrJConnector;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,8 +22,7 @@ import java.util.Properties;
 
 public class EditionRecordRelationsMaintainerComponent {
 
-    private static Logger log = LoggerFactory.getLogger(
-            dk.statsbiblioteket.medieplatform.newspaper.titleRecords.TitleRecordRelationsMaintainerComponent.class);
+    private static Logger log = LoggerFactory.getLogger(EditionRecordRelationsMaintainerComponent.class);
 
 
     /**
@@ -33,7 +32,7 @@ public class EditionRecordRelationsMaintainerComponent {
      * @param args an array of length 1, where the first entry is a path to the properties file
      */
     public static void main(String[] args) throws Exception {
-        log.info("Entered " + dk.statsbiblioteket.medieplatform.newspaper.titleRecords.TitleRecordRelationsMaintainerComponent.class);
+        log.info("Entered " + EditionRecordRelationsMaintainerComponent.class);
         doMain(args);
     }
 
@@ -47,10 +46,11 @@ public class EditionRecordRelationsMaintainerComponent {
                 fedoraLocation,
                 properties.getProperty(ConfigConstants.DOMS_PIDGENERATOR_URL),
                 null);
+        SolrServer solrServer = new SolrJConnector(properties.getProperty(ConfigConstants.AUTONOMOUS_SBOI_URL)).getSolrServer();
         DomsItemFactory itemFactory = new DomsItemFactory();
-        NewspaperIndex newspaperIndex = new NewspaperIndex();
+        NewspaperIndex newspaperIndex = new NewspaperIndex(solrServer, itemFactory);
 
-        RunnableComponent<Item> component = new RunnableTitleRecordRelationsMaintainer(properties, eFedora, itemFactory,
+        RunnableComponent<Item> component = new RunnableEditionRecordRelationsMaintainer(properties, eFedora, itemFactory,
                 newspaperIndex);
         CallResult<Item> result = SBOIDomsAutonomousComponentUtils.startAutonomousComponent(properties, component,new
                 DomsItemFactory());
