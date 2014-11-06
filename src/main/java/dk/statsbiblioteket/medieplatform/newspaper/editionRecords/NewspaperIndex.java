@@ -42,9 +42,9 @@ public class NewspaperIndex {
                                                  + " AND "
                                                  + AVIS_ID_FIELD_NAME + ":\"%s\""
                                                  + " AND "
-                                                 + START_DATE_FIELD_NAME + ":\"[* TO %s]\""
+                                                 + START_DATE_FIELD_NAME + ":[* TO %s]"
                                                  + " AND "
-                                                 +  END_DATE_FIELD_NAME + ":\"[%s TO *]\"", avisID, date, date));
+                                                 +  END_DATE_FIELD_NAME + ":[%s TO *]", avisID, date, date));
             query.setRows(Integer.MAX_VALUE); //Fetch size. Do not go over 1000 unless you specify fields to fetch which does not include content_text
             query.setStart(0);
             //IMPORTANT!Only use facets if needed.
