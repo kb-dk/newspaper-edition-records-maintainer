@@ -19,16 +19,17 @@ import static org.mockito.Mockito.when;
 
 public class RunnableEditionRecordRelationsMaintainerIT {
     /**
-     * Test where one relation should be added.
-     *
-     * Index query returns three items. DOMS returns two known.
-     *
-     * The result should be that the missing relation is added.
-     *
+     * Integration test for edition records
      * @throws Exception
      */
     @Test(groups="externalTest")
-    public void testDoWorkOnItemAddOneRelation() throws Exception {
+    public void testDoWorkOnItem() throws Exception {
+        //TODO
+        //Create an edition object relating to a known newspaper title
+        //Add a relation to another one
+        //Flush the triple store index
+        //Run the test
+        //Test that relations are now to the correct newspaper title
     }
 
 }
