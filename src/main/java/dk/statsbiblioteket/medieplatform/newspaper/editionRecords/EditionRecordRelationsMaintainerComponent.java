@@ -47,7 +47,7 @@ public class EditionRecordRelationsMaintainerComponent {
         EnhancedFedoraImpl eFedora = new EnhancedFedoraImpl(creds,
                 fedoraLocation,
                 properties.getProperty(ConfigConstants.DOMS_PIDGENERATOR_URL),
-                null, fedoraRetries, fedoraRetries, fedoraRetries, fedoraDelayBetweenRetries);
+                null, fedoraRetries, fedoraDelayBetweenRetries);
         SolrServer solrServer = new SolrJConnector(properties.getProperty(ConfigConstants.AUTONOMOUS_SBOI_URL)).getSolrServer();
         DomsItemFactory itemFactory = new DomsItemFactory();
         NewspaperIndex newspaperIndex = new NewspaperIndex(solrServer, itemFactory);
