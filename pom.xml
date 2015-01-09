@@ -79,6 +79,19 @@
     <dependencies>
 
         <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <!--Required for the geventevaluator used in logback for now-->
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.0.7</version>
+        </dependency>
+
+
+        <dependency>
             <groupId>dk.statsbiblioteket.newspaper</groupId>
             <artifactId>sboi-doms-autonomous-component</artifactId>
             <version>2.1-SNAPSHOT</version>
