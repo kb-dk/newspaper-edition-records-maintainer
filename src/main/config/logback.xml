@@ -36,7 +36,7 @@
         <appender-ref ref="EMAIL"/>
     </logger>
 
-    <logger name="dk.statsbibliokeket" level="INFO"/>
+    <logger name="dk.statsbiblioteket" level="INFO"/>
     <root level="WARN">
         <appender-ref ref="FILE"/>
     </root>
