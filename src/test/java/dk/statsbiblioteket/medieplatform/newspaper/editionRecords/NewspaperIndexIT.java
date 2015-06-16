@@ -12,7 +12,7 @@ import java.io.FileInputStream;
 import java.util.List;
 import java.util.Properties;
 
-import static org.testng.Assert.*;
+import static org.testng.AssertJUnit.*;
 
 public class NewspaperIndexIT {
 
@@ -32,7 +32,7 @@ public class NewspaperIndexIT {
     @Test(groups = "externalTest")
     public void testGetNewspapers() throws Exception {
         NewspaperIndex newspaperIndex = new NewspaperIndex(new SolrJConnector(summaLocation).getSolrServer(), new DomsItemFactory());
-        List<Item> newspapers = newspaperIndex.getNewspapers("berlingsketidende", "1970-01-01");
-        assertTrue(newspapers.size() == 1);
+        List<Item> newspapers = newspaperIndex.getNewspapers("adresseavisen1759", "1789-01-01");
+        assertEquals(1, newspapers.size());
     }
 }
