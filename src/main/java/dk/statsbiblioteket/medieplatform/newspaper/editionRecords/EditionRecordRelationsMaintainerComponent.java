@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import dk.statsbiblioteket.doms.central.connectors.EnhancedFedoraImpl;
-import dk.statsbiblioteket.doms.webservices.authentication.Credentials;
+import dk.statsbiblioteket.sbutil.webservices.authentication.Credentials;
 import dk.statsbiblioteket.medieplatform.autonomous.CallResult;
 import dk.statsbiblioteket.medieplatform.autonomous.ConfigConstants;
 import dk.statsbiblioteket.medieplatform.autonomous.DomsItemFactory;
