@@ -1,3 +1,6 @@
+1.3
+ * Use newest version of doms libraries, to avoid SparQL queries.
+
 1.2
  * Use newest batch event framework. This fixes the issue where the component is run multiple times.
 
