@@ -1,3 +1,6 @@
+1.4
+ * Renamed from newspaper-edition-records-maintainer to newspaper-editionRecord-maintainer 
+
 1.3
  * Use newest version of doms libraries, to avoid SparQL queries.
 
