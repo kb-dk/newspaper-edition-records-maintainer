@@ -14,8 +14,8 @@
 
     <scm>
         <url>https://github.com/statsbiblioteket/newspaper-editionRecord-maintainer</url>
-        <connection>scm:git:https://github.com/statsbiblioteket/newspaper-editionRecord-maintainer.git</connection>
-        <developerConnection>scm:git:git@github.com:statsbiblioteket/newspaper-editionRecord-maintainer.git
+        <connection>scm:git:https://github.com/statsbiblioteket/newspaper-edition-records-maintainer.git</connection>
+        <developerConnection>scm:git:git@github.com:statsbiblioteket/newspaper-edition-records-maintainer.git
         </developerConnection>
         <tag>HEAD</tag>
     </scm>
