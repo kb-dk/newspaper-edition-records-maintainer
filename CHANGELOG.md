@@ -1,3 +1,6 @@
+1.4
+* Update to newest version of newspaper event framework to be able to handle Items without Events datastreams
+
 1.3
  * Use newest version of doms libraries, to avoid SparQL queries.
 
